@@ -1,0 +1,12 @@
+deps
+opt/
+/.lein-failures
+.lein-repl-history
+*.iml
+.nrepl-port
+
+.lsp/.cache
+.clj-kondo/*
+!.clj-kondo/config.edn
+
+input.txt
