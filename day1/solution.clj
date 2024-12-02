@@ -16,4 +16,16 @@
         zipped (map vector (sort left-values) (sort right-values))]
     (reduce (fn [total pair] (+ total (abs (reduce - pair)))) 0  zipped)))
 
-(print (get-total (slurp "input.txt")))
+(println (get-total (slurp "input.txt")))
+
+;; Part two (occurrences count)
+;; 1. and 2. - Same as before
+;; 3. Create a hash map that counts the occurrences per value for the right list
+;; 4. Reduce the left list with occurences multiplier
+
+(defn get-similarity-score [input]
+  (let [[left-values right-values] (reduce collect-pair [[] []] (str/split-lines input))
+        occurrences (frequencies right-values)]
+    (reduce (fn [total left-value] (+ total (* left-value (get occurrences left-value 0)))) 0 left-values)))
+
+(println (get-similarity-score (slurp "input.txt")))
