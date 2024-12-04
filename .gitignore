@@ -10,3 +10,5 @@ opt/
 !.clj-kondo/config.edn
 
 input.txt
+
+scratchpad.md
