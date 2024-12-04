@@ -31,15 +31,15 @@
           difference (if (nil? b) 1 (abs (- a b)))
           direction (if (nil? b) prev-direction (compare a b))]
       (cond
-        (< (count remaining) 2) [true, nil]
-        (< difference 1) [false, index]
-        (> difference 3) [false, index]
-        (direction-changed? prev-direction direction) [false, index]
+        (< (count remaining) 2) true
+        (< difference 1) false
+        (> difference 3) false
+        (direction-changed? prev-direction direction) false
         :else (recur direction (+ index 1) (rest remaining))))))
 
 (defn safe-reports-amount [input]
   (reduce
-   (fn [safe-count level] (+ safe-count (if (first (check-level (parse-level level))) 1 0)))
+   (fn [safe-count level] (+ safe-count (if (check-level (parse-level level)) 1 0)))
    0
    (str/split-lines input)))
 
@@ -55,19 +55,17 @@
   (into (subvec coll 0 pos) (subvec coll (inc pos))))
 
 (defn check-level-with-dampener [level]
-  (let [[is-safe? _] (check-level level)]
-    (if is-safe?
-      true
-      ;; Not safe, brute force all possible removals
-      (loop [index 0]
-        (if (>= index (count level))
+  (if (check-level level)
+    true
+      ;; Not safe, removing a single bad level at a time and try again
+    (loop [index 0]
+      (if (>= index (count level))
           ;; No removal worked
-          false
-          (let [without-level (vec-remove index level)
-                [is-safe-without-level? _] (check-level without-level)]
-            (if is-safe-without-level?
-              true
-              (recur (inc index)))))))))
+        false
+        (let [without-level (vec-remove index level)]
+          (if (check-level without-level)
+            true
+            (recur (inc index))))))))
 
 (defn safe-reports-amount-with-dampener [input]
   (reduce
