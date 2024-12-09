@@ -15,7 +15,7 @@
 (defn translate-coords [coords dir]
   (mapv + coords dir))
 
-;; Part one (find all instances of XMAS, backwards as well)
+;; Common
 
 (defn letter-matrix [input]
   (let
@@ -24,6 +24,8 @@
     rows (count input-lines)
     cols (count (first input-lines))]
     (create-matrix-from-string input-as-one-line rows cols)))
+
+;; Part one (find all instances of XMAS, backwards as well)
 
 (def directions
   [[0 1] [1 0] [1 1] [1 -1] [0 -1] [-1 0] [-1 -1] [-1 1]])
@@ -41,7 +43,7 @@
       :else (recur (rest expected-seq)
                    (translate-coords [x y] dir)))))
 
-(defn find-matches [matrix]
+(defn find-x-xmas-matches [matrix]
   (let [rows (:rows matrix)
         cols (:cols matrix)]
     (for [x (range cols)
@@ -57,6 +59,41 @@
 (->>
  (slurp "input.txt")
  letter-matrix
- find-matches
+ find-x-xmas-matches
+ count
+ println)
+
+;; Part two (find all instances of X-MAS, a X of S's, M's with A in the center)
+
+(defn searches [origin matrix]
+  [;; go top-left to bottom-right, forwards
+   (find-string-in-dir matrix "MAS" (translate-coords origin [-1 -1]) [1 1])
+   ;; go top-left to bottom-right, backwards
+   (find-string-in-dir matrix "SAM" (translate-coords origin [-1 -1]) [1 1])
+   ;; go top-right to left, forwards
+   (find-string-in-dir matrix "MAS" (translate-coords origin [1 -1]) [-1 1])
+   ;; go top-right to left, backwards
+   (find-string-in-dir matrix "SAM" (translate-coords origin [1 -1]) [-1 1])])
+
+(defn find-a-x-mas-matches [matrix]
+  (let [rows (:rows matrix)
+        cols (:cols matrix)]
+    (for [x (range cols)
+          y (range rows)
+          :let [coords [x y]
+                match (if (= (get-element matrix x y) \A)
+                        (->>
+                         (searches coords matrix)
+                         (filter some?)
+                         (count)
+                         (= 2))
+                        nil)]
+          :when match]
+      match)))
+
+(->>
+ (slurp "input.txt")
+ letter-matrix
+ find-a-x-mas-matches
  count
  println)
